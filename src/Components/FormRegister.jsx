@@ -1,5 +1,22 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import Box from "@mui/material/Box";
+import Modal from "@mui/material/Modal";
+import TextField from "@mui/material/TextField";
+import { register, veriflyCode } from "../Services/UserServices";
+
+const style = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  border: "1px solid #000 20px",
+  borderRadius: 2,
+  boxShadow: 24,
+  p: 2,
+};
 
 const FormRegister = () => {
   const [formData, setFormData] = useState({
@@ -8,7 +25,11 @@ const FormRegister = () => {
     password: "",
     cfmpassword: "",
     phoneNumber: "",
+    veriflyCode: "",
   });
+
+  const [open, setOpen] = React.useState(false);
+  const handleClose = () => setOpen(false);
 
   const [errors, setErrors] = useState({});
 
@@ -20,9 +41,15 @@ const FormRegister = () => {
     setErrors({});
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleVeriflyCode = async () => {
+    const data = await veriflyCode(formData.email, formData.veriflyCode);
+    if (data) {
+      alert("Bạn đã đăng ký thành công");
+    }
+  };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     const newErrors = {};
     //Tên không được để trống
     if (!formData.username.trim()) {
@@ -56,7 +83,7 @@ const FormRegister = () => {
     } else {
       //Số điện thoại phải là số và có 10 chữ số
       const numbericValue = formData.phoneNumber.replace(/\D/g, "");
-      const isValid = /^\d{10}$/.test(numbericValue);
+      const isValid = /(84|0[3|5|7|8|9])+([0-9]{8})\b/g.test(numbericValue);
       if (!isValid) {
         newErrors.phoneNumber = "Số điện thoại không hợp lệ";
       }
@@ -69,8 +96,19 @@ const FormRegister = () => {
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
     } else {
-      console.log("Form submitted:", formData);
-      setErrors({});
+      const data = await register(
+        formData.username,
+        formData.email,
+        formData.password,
+        formData.phoneNumber
+      );
+      if (data === true) {
+        setErrors({});
+        setOpen(true);
+      } else {
+        newErrors.email = "Email đã đăng ký tài khoản!";
+        setErrors(newErrors);
+      }
     }
   };
 
@@ -82,7 +120,7 @@ const FormRegister = () => {
           <div className="w-1/2 py-8 px-16 relative">
             <Link to="/">
               <i
-                class="fa-solid fa-house cursor-pointer text-2xl text-blue-700 
+                className="fa-solid fa-house cursor-pointer text-2xl text-blue-700 
               float-end absolute top-2 right-4 hover:text-[#C6AB00] transition-all"
               ></i>
             </Link>
@@ -210,20 +248,50 @@ const FormRegister = () => {
               >
                 Đăng ký
               </button>
-              {/* <i
-                  class="text-2xl cursor-pointer fa-solid fa-house text-blue-700 hover:text-3xl transition-all
-                hover:text-[#C6AB00]"
-                ></i> */}
             </form>
             <div className="mt-5 cursor-default float-end">
               Bạn đã có tài khoản hãy{" "}
-              <div className="text-blue-700 font-semibold cursor-pointer hover:text-[#C6AB00]">
+              <Link
+                to="/login"
+                className="text-blue-700 font-semibold cursor-pointer hover:text-[#C6AB00]"
+              >
                 đăng nhập.
-              </div>
+              </Link>
             </div>
           </div>
         </div>
       </div>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <div>
+            <h1 className="text-center text-2xl uppercase mb-4">
+              Nhập mã xác thực email
+            </h1>
+            <TextField
+              required
+              id="veriflyCode"
+              name="veriflyCode"
+              label="Mã xác thực"
+              variant="filled"
+              value={formData.veriflyCode}
+              sx={{ width: "100%" }}
+              onChange={handleInputChange}
+            />
+          </div>
+          <button
+            className="bg-black hover:bg-gray-700 text-white font-bold py-2 px-5 rounded uppercase mt-4 transition-all float-end"
+            type="submit"
+            onClick={handleVeriflyCode}
+          >
+            Xác nhận
+          </button>
+        </Box>
+      </Modal>
     </div>
   );
 };

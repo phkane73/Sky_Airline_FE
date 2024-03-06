@@ -17,7 +17,7 @@ const routes = [
     layout: BookingLayout,
   },
   {
-    path: "/booking/validinformation",
+    path: "/booking/validinformation/:id/:class",
     page: ValidInformation,
     layout: BookingLayout,
   },

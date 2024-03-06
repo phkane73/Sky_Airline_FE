@@ -120,9 +120,12 @@ const FormLogin = () => {
               </form>
               <div className="mt-5 cursor-default float-end">
                 Bạn chưa có tài khoản hãy{" "}
-                <div className="text-blue-700 font-semibold cursor-pointer hover:text-[#C6AB00]">
+                <Link
+                  to="/register"
+                  className="text-blue-700 font-semibold cursor-pointer hover:text-[#C6AB00]"
+                >
                   đăng ký tài khoản.
-                </div>
+                </Link>
               </div>
             </div>
           </div>
